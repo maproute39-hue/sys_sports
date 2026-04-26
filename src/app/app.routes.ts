@@ -16,7 +16,13 @@ export const routes: Routes = [
     pathMatch: 'full',
     redirectTo: 'teams'
   },
-
+{
+  path: 'results',
+  loadComponent: () =>
+    import('./pages/results/results').then(m => m.Results),
+  canActivate: [authGuard],
+  title: 'Resultados'
+},
   {
     path: 'categories',
     loadComponent: () =>

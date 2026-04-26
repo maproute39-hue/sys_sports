@@ -1,0 +1,200 @@
+<main class="app-wrapper">
+  <div class="container-fluid">
+
+    <div class="app-page-head d-flex align-items-center justify-content-between mb-3">
+      <div>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+              <a routerLink="/home">
+                <i class="fi fi-rr-home"></i> Home
+              </a>
+            </li>
+            <li class="breadcrumb-item active">Tabla de resultados</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+      <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+          <h4 class="mb-1">Clasificación general</h4>
+          <p class="text-muted mb-0">
+            Tabla calculada según partidos jugados, sets ganados y puntos obtenidos.
+          </p>
+        </div>
+
+        <span class="badge bg-primary fs-6">
+          {{ standings.length }} equipos
+        </span>
+      </div>
+    </div>
+
+    <div class="row mb-3" *ngIf="standings.length > 0">
+      <div class="col-md-3 mb-2">
+        <div class="card shadow-sm border-0">
+          <div class="card-body">
+            <small class="text-muted">Líder</small>
+            <h5 class="mb-0">{{ standings[0]?.name }}</h5>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 mb-2">
+        <div class="card shadow-sm border-0">
+          <div class="card-body">
+            <small class="text-muted">Más puntos</small>
+            <h5 class="mb-0">{{ standings[0]?.points }} pts</h5>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 mb-2">
+        <div class="card shadow-sm border-0">
+          <div class="card-body">
+            <small class="text-muted">Sets ganados líder</small>
+            <h5 class="mb-0">{{ standings[0]?.setsFor }}</h5>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 mb-2">
+        <div class="card shadow-sm border-0">
+          <div class="card-body">
+            <small class="text-muted">Diferencia sets líder</small>
+            <h5 class="mb-0">
+              {{ standings[0].setsFor - standings[0].setsAgainst }}
+            </h5>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+        
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <div>
+          <h5 class="mb-0">Ranking de equipos</h5>
+          <small class="text-muted">PJ, PG, PP, SG, SP y PTS</small>
+        </div>
+      </div>
+      <ul id="category-tabs" class="nav nav-tabs mb-4"></ul>
+
+<tbody id="results-table-body">
+  <tr>
+    <td colspan="9" class="text-center">Cargando resultados...</td>
+  </tr>
+</tbody>
+      <ul class="nav nav-tabs mb-3" *ngIf="standingsByCategory.length > 0">
+<li class="nav-item" *ngFor="let category of standingsByCategory">
+  <button
+    type="button"
+    class="nav-link"
+    [class.active]="activeCategoryId === category.categoryId"
+    (click)="setActiveCategory(category.categoryId)">
+
+    {{ getCategoryName(category.categoryId) }}
+
+  </button>
+</li>
+</ul>
+
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>#</th>
+              <th>Equipo</th>
+              <th class="text-center">PJ</th>
+              <th class="text-center">PG</th>
+              <th class="text-center">PP</th>
+              <th class="text-center">SG</th>
+              <th class="text-center">SP</th>
+              <th class="text-center">DIF</th>
+              <th class="text-center">PTS</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let team of standings; let i = index">
+              <td>
+                <span
+                  class="badge"
+                  [ngClass]="{
+                    'bg-warning text-dark': i === 0,
+                    'bg-secondary': i > 0
+                  }">
+                  {{ i + 1 }}
+                </span>
+              </td>
+
+           <td>
+  <div class="d-flex align-items-center gap-2">
+
+    <img
+      [src]="getTeamLogo(team)"
+      class="avatar avatar-sm rounded-circle border"
+      style="width: 36px; height: 36px; object-fit: cover;"
+    />
+
+    <div>
+      <div class="fw-bold">{{ team.name }}</div>
+      <small class="text-muted">ID: {{ team.teamId }}</small>
+    </div>
+
+  </div>
+</td>
+
+              <td class="text-center">{{ team.played }}</td>
+              <td class="text-center text-success fw-bold">{{ team.won }}</td>
+              <td class="text-center text-danger fw-bold">{{ team.lost }}</td>
+              <td class="text-center">{{ team.setsFor }}</td>
+              <td class="text-center">{{ team.setsAgainst }}</td>
+
+              <td class="text-center">
+                <span
+                  class="badge"
+                  [ngClass]="{
+                    'bg-success': (team.setsFor - team.setsAgainst) > 0,
+                    'bg-danger': (team.setsFor - team.setsAgainst) < 0,
+                    'bg-secondary': (team.setsFor - team.setsAgainst) === 0
+                  }">
+                  {{ team.setsFor - team.setsAgainst }}
+                </span>
+              </td>
+
+              <td class="text-center">
+                <span class="badge bg-primary fs-6">
+                  {{ team.points }}
+                </span>
+              </td>
+
+              <td>
+                <span *ngIf="i === 0" class="badge bg-warning text-dark">
+                  Líder
+                </span>
+
+                <span *ngIf="i > 0 && team.points > 0" class="badge bg-success">
+                  Competitivo
+                </span>
+
+                <span *ngIf="team.points === 0" class="badge bg-danger">
+                  Sin puntos
+                </span>
+              </td>
+            </tr>
+
+            <tr *ngIf="standings.length === 0">
+              <td colspan="10" class="text-center py-5 text-muted">
+                No hay resultados registrados todavía.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
