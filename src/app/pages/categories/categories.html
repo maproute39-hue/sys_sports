@@ -74,7 +74,7 @@ style="cursor: pointer;"
       Todas las categorías tienen partidos programados.
     </div>
 
-    <div class="alert alert-danger" role="alert">
+    <!-- <div class="alert alert-danger" role="alert">
       Puedes
       <a
         href="javascript:void(0);"
@@ -83,7 +83,10 @@ style="cursor: pointer;"
         borrar toda la información de partidos
       </a>
       existente en la base de datos.
-    </div>
+    </div> -->
+<p class="card-text">Puedes <code (click)="deleteAllMatches()" style="cursor: pointer; color: red;">Borrar</code> toda la información de partidos existente en la base de datos.</p>
+
+
       <div [ngClass]="selectedCategory ? 'col-lg-5' : 'col-12'">
         <div class="row">
           <div class="card-body">

@@ -357,17 +357,21 @@ async openMatchResultModal(match: MatchRecord): Promise<void> {
     return match.sets?.[index]?.[side] ?? '';
   };
 
-  const result = await Swal.fire({
+const result = await Swal.fire({
+  title: 'Registrar resultado',
+  width: 760,
+  showCancelButton: true,
+  confirmButtonText: 'Guardar resultado',
+  cancelButtonText: 'Cancelar',
+  confirmButtonColor: '#198754',
 
-    title: 'Registrar resultado',
-    width: 760,
-    showCancelButton: true,
-    confirmButtonText: 'Guardar resultado',
-    cancelButtonText: 'Cancelar',
-    confirmButtonColor: '#198754',
-    customClass: {
-      popup: 'swal-rounded'
-    },
+  customClass: {
+    popup: 'swal-rounded',
+    confirmButton: 'swal-btn-rounded',
+    cancelButton: 'swal-btn-rounded'
+  },
+
+  buttonsStyling: false, // 👈 IMPORTANTE (desactiva estilos default)
     didOpen: () => {
       const inputs = document.querySelectorAll('.score-input');
 

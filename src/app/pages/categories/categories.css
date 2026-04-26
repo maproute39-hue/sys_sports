@@ -181,3 +181,30 @@
   transform: translateY(-4px);
   box-shadow: 0 10px 25px rgba(25, 135, 84, 0.2);
 }
+/* popup redondeado */
+.swal-rounded {
+  border: none;
+  border-radius: 20px !important;
+}
+
+/* botones redondeados */
+.swal-btn-rounded {
+  border-radius: 30px !important;
+  padding: 10px 22px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* botón confirmar */
+.swal-btn-rounded.swal2-confirm {
+  background-color: #198754;
+  border: none;
+  color: white;
+}
+
+/* botón cancelar */
+.swal-btn-rounded.swal2-cancel {
+  background-color: #6c757d;
+  border: none;
+  color: white;
+}

@@ -1,1 +1,27 @@
 /* You can add global styles to this file, and also import other style files */
+.swal-btn-rounded {
+  border-radius: 999px !important;
+  padding: 12px 26px;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.swal-btn-rounded:hover {
+  border: none;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+}
+
+/* botón confirmar */
+.swal-btn-rounded.swal2-confirm {
+  background-color: #198754;
+  border: none;
+  color: white;
+}
+
+/* botón cancelar */
+.swal-btn-rounded.swal2-cancel {
+  background-color: #6c757d;
+  border: none;
+  color: white;
+}
