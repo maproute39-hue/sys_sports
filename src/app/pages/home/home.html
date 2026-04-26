@@ -1,0 +1,342 @@
+<main class="app-wrapper">
+  <div class="container-fluid">
+
+    <div class="app-page-head d-flex flex-wrap gap-3 align-items-center justify-content-between">
+      <div class="clearfix">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+              <a href="javascript:void(0)">
+                <i class="fi fi-rr-home"></i> Home
+              </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Finance</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+
+    <div class="row">
+
+      <!-- COLUMNA PRINCIPAL -->
+      <div class="col-xxl-9 col-xl-8">
+        <div class="row">
+
+          <!-- KPI cards -->
+          <div class="col-xxl-3 col-sm-6">
+            <div class="card">
+              <div class="card-body d-flex gap-3 align-items-center">
+                <div class="avatar bg-success-subtle rounded-circle text-success">
+                  <i class="fi fi-rr-coins"></i>
+                </div>
+                <div class="clearfix">
+                  <span class="fw-semibold text-muted">Ingresos cobrados del mes</span>
+                  <h2 class="fw-bold mb-0 mt-1">{{ monthlyIncome | currency:'USD':'symbol':'1.0-0' }}</h2>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xxl-3 col-sm-6">
+            <div class="card">
+              <div class="card-body d-flex gap-3 align-items-center">
+                <div class="avatar bg-info-subtle rounded-circle text-info">
+                  <i class="fi fi-rr-calendar"></i>
+                </div>
+                <div class="clearfix">
+                  <span class="fw-semibold text-muted">Reservas confirmadas del mes</span>
+                  <h2 class="fw-bold mb-0 mt-1">{{ confirmedBookings }}</h2>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xxl-3 col-sm-6">
+            <div class="card">
+              <div class="card-body d-flex gap-3 align-items-center">
+                <div class="avatar bg-danger-subtle rounded-circle text-danger">
+                  <i class="fi fi-rr-chart-histogram"></i>
+                </div>
+                <div class="clearfix">
+                  <span class="fw-semibold text-muted">Saldo pendiente</span>
+                  <h2 class="fw-bold mb-0 mt-1">{{ pendingBalance | currency:'USD':'symbol':'1.0-0' }}</h2>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xxl-3 col-sm-6">
+            <div class="card">
+              <div class="card-body d-flex gap-3 align-items-center">
+                <div class="avatar bg-warning-subtle rounded-circle text-warning">
+                  <i class="fi fi-rr-objects-column"></i>
+                </div>
+                <div class="clearfix">
+                  <span class="fw-semibold text-muted">Cotizaciones del mes</span>
+                  <h2 class="fw-bold mb-0 mt-1">{{ monthlyQuotes }}</h2>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gráfico principal -->
+          <div class="col-lg-8">
+            <div class="card h-100">
+              <div class="card-header border-0 d-flex pb-0 justify-content-between align-items-center">
+                <h6 class="card-title mb-0">Cotizaciones vs Reservas por mes</h6>
+
+                <select class="form-select form-select-sm w-auto" [(ngModel)]="selectedPeriod"
+                  (change)="onPeriodChange()">
+                  <option value="thisYear">Este año</option>
+                  <option value="lastYear">Año pasado</option>
+                </select>
+              </div>
+
+              <div class="card-body p-2">
+                <apx-chart [series]="summaryChartOptions.series!" [chart]="summaryChartOptions.chart!"
+                  [xaxis]="summaryChartOptions.xaxis!" [stroke]="summaryChartOptions.stroke!"
+                  [dataLabels]="summaryChartOptions.dataLabels!" [legend]="summaryChartOptions.legend!"
+                  [tooltip]="summaryChartOptions.tooltip!"></apx-chart>
+              </div>
+            </div>
+          </div>
+
+          <!-- Donut reservas por estado -->
+          <div class="col-xl-4 col-lg-6">
+            <div class="card h-100">
+              <div class="card-header d-flex flex-wrap gap-3 align-items-center justify-content-between border-0 pb-0">
+                <h6 class="card-title mb-0">Reservas por estado</h6>
+              </div>
+              <div class="card-body">
+                <apx-chart [series]="leadsChartOptions.series!" [chart]="leadsChartOptions.chart!"
+                  [labels]="leadsChartOptions.labels!" [responsive]="leadsChartOptions.responsive!"
+                  [legend]="leadsChartOptions.legend!"></apx-chart>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- COLUMNA DERECHA -->
+      <div class="col-xxl-3 col-xl-4">
+        <div class="card overflow-hidden bg-primary ovarlay-primary-gradient border-0"
+          style="background-image: url(assets/images/wind.gif); background-position: center; background-size: cover;">
+          <div
+            class="card-header pb-0 border-0 d-flex align-items-center justify-content-between z-1 position-relative">
+            <h6 class="card-title mb-0 text-white">Ingreso mensual</h6>
+          </div>
+
+          <div class="card-body pt-2 pb-0">
+            <div class="d-flex gap-2 align-items-center">
+              <h2 class="mb-0 text-white">{{ incomeProgressPercent }}%</h2>
+              <span class="text-white">+15% vs mes pasado</span>
+            </div>
+
+            <div class="mb-5 z-n1 position-relative">
+              <apx-chart [series]="monthlyStatusChartOptions.series!" [chart]="monthlyStatusChartOptions.chart!"
+                [stroke]="monthlyStatusChartOptions.stroke!" [dataLabels]="monthlyStatusChartOptions.dataLabels!"
+                [fill]="monthlyStatusChartOptions.fill!" [tooltip]="monthlyStatusChartOptions.tooltip!"
+                [xaxis]="monthlyStatusChartOptions.xaxis!"></apx-chart>
+
+              <div class="text-white mt-n5 text-center">{{ monthlyReservations }} reservas</div>
+            </div>
+
+            <div class="text-center px-3">
+              <p class="text-white mb-0">
+                Hoy generaste
+                <strong class="text-warning">{{ todayIncome | currency:'USD':'symbol':'1.0-0' }}</strong>
+                en reservas, es mayor que el mes pasado, sigue así.
+              </p>
+            </div>
+          </div>
+
+          <div class="card-footer border-0 pt-3">
+            <div class="bg-body py-3 px-3 rounded-3 d-flex">
+              <div class="text-center w-50 py-2">
+                <h4 class="mb-0">{{ targetIncome | currency:'USD':'symbol':'1.0-0' }}</h4>
+                <span class="text-primary text-2xs fw-semibold d-block">Meta</span>
+              </div>
+              <div class="vr opacity-50"></div>
+              <div class="text-center w-50 py-2">
+                <h4 class="mb-0">{{ currentIncome | currency:'USD':'symbol':'1.0-0' }}</h4>
+                <span class="text-primary text-2xs fw-semibold d-block">Ingresos</span>
+              </div>
+              <div class="vr opacity-50"></div>
+              <div class="text-center w-50 py-2">
+                <h4 class="mb-0">{{ todayIncome | currency:'USD':'symbol':'1.0-0' }}</h4>
+                <span class="text-primary text-2xs fw-semibold d-block">Hoy</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TASA DE CONVERSIÓN -->
+      <div class="col-xxl-3 col-lg-4 col-md-6">
+        <div class="card overflow-hidden h-100">
+          <div class="card-header pb-0 border-0">
+            <h6 class="card-title mb-0">Tasa de conversión</h6>
+          </div>
+
+          <div class="card-body pt-0 border-light border-bottom">
+            <div class="mb-0 mt-n2">
+              <apx-chart [series]="monthlyTargetChartOptions.series!" [chart]="monthlyTargetChartOptions.chart!"
+                [plotOptions]="monthlyTargetChartOptions.plotOptions!"
+                [dataLabels]="monthlyTargetChartOptions.dataLabels!" [stroke]="monthlyTargetChartOptions.stroke!"
+                [fill]="monthlyTargetChartOptions.fill!" [labels]="monthlyTargetChartOptions.labels!"></apx-chart>
+
+              <div class="mt-n5 text-center">{{ totalSales | number }} Ventas</div>
+            </div>
+          </div>
+
+          <div class="card-footer border-0">
+            <h6 class="card-title mb-3">Tasa de conversión</h6>
+
+            <div class="progress-stacked bg-transparent mb-4">
+              <div *ngFor="let segment of conversionSegments" class="progress bg-transparent"
+                [style.width.%]="segment.value" role="progressbar" [attr.aria-valuenow]="segment.value"
+                aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar" [ngClass]="segment.progressClass"></div>
+              </div>
+            </div>
+            <div class="d-grid gap-1">
+              <div *ngFor="let segment of conversionSegments" class="d-flex gap-1 align-items-center py-1 mx-1">
+                <i class="fa fa-square me-1" [ngClass]="segment.textClass"></i>
+                {{ segment.label }}
+                <strong class="text-dark fw-semibold ms-auto">{{ segment.value }}%</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOP DESTINOS -->
+      <div class="col-xxl-3 col-lg-4 col-md-6">
+        <div class="card h-100">
+          <div class="card-header border-0 pb-0 d-flex align-items-center justify-content-between">
+            <h6 class="card-title mb-0">Top destinos</h6>
+            <a href="javascript:void(0);" class="btn-link">Ver todos</a>
+          </div>
+
+          <div class="card-body pt-2">
+            <div class="d-flex gap-2 mb-3 align-items-center">
+              <h2 class="mb-0">{{ topDestinationsRevenue | currency:'USD':'symbol':'1.0-0' }}</h2>
+              <span>+8.2% vs mes pasado</span>
+            </div>
+
+            <div class="row g-1">
+              <div class="col-12" *ngFor="let destination of topDestinations">
+                <div class="p-3 border rounded">
+                  <div class="d-flex align-items-center mb-1">
+                    <div class="avatar rounded-circle avatar-xxs me-2">
+                      <img [src]="destination.flag" [alt]="destination.name">
+                    </div>
+                    <h5 class="mb-0">{{ destination.name }}</h5>
+                  </div>
+                  <h5 class="mb-0">
+                    {{ destination.packages | number }}
+                    <span class="text-2xs text-body ms-1">paquetes</span>
+                  </h5>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ÚLTIMAS RESERVAS -->
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header d-flex flex-wrap gap-3 align-items-center justify-content-between border-0 pb-0">
+            <h6 class="card-title mb-0">Últimas reservas</h6>
+
+            <input type="text" class="form-control form-control-sm w-auto" placeholder="Buscar" [(ngModel)]="searchTerm"
+              (ngModelChange)="onSearchChange()" />
+          </div>
+
+          <div class="card-body px-1 pt-2 pb-2">
+            <div class="table-responsive">
+              <table class="table table-sm table-row-rounded align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th class="minw-150px">Nombre</th>
+                    <th class="minw-150px">Fecha</th>
+                    <th class="minw-200px">Descripción</th>
+                    <th>Categoría</th>
+                    <th>Importe</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of paginatedReservations">
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <div class="avatar avatar-xxs rounded-circle me-2">
+                          <img [src]="item.avatar" [alt]="item.name">
+                        </div>
+                        {{ item.name }}
+                      </div>
+                    </td>
+                    <td>{{ item.date }}</td>
+                    <td>{{ item.description }}</td>
+                    <td>{{ item.category }}</td>
+                    <td [ngClass]="item.amount >= 0 ? 'text-success fw-bold' : 'text-danger fw-bold'">
+                      {{ item.amount >= 0 ? '+' : '-' }}{{ Math.abs(item.amount) | currency:'USD':'symbol':'1.0-0' }}
+                    </td>
+                    <td>
+                      <span class="badge badge-lg" [ngClass]="{
+                          'bg-success-subtle text-success': item.status === 'Completed',
+                          'bg-danger-subtle text-danger': item.status === 'Paid',
+                          'bg-warning-subtle text-warning': item.status === 'Pending'
+                        }">
+                        {{ item.status }}
+                      </span>
+                    </td>
+                  </tr>
+
+                  <tr *ngIf="paginatedReservations.length === 0">
+                    <td colspan="6" class="text-center text-muted py-4">
+                      No se encontraron registros.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mt-3 px-2">
+              <small class="text-muted">
+                Mostrando
+                {{ filteredReservations.length ? ((currentPage - 1) * pageSize + 1) : 0 }}
+                a
+                {{ getShowingTo() }}
+                de
+                {{ filteredReservations.length }} entradas
+              </small>
+
+              <div class="btn-group">
+                <button class="btn btn-outline-secondary btn-sm" (click)="goToPage(currentPage - 1)"
+                  [disabled]="currentPage === 1">
+                  Anterior
+                </button>
+
+                <button *ngFor="let page of pages" class="btn btn-sm"
+                  [ngClass]="page === currentPage ? 'btn-primary' : 'btn-outline-secondary'" (click)="goToPage(page)">
+                  {{ page }}
+                </button>
+
+                <button class="btn btn-outline-secondary btn-sm" (click)="goToPage(currentPage + 1)"
+                  [disabled]="currentPage === totalPages">
+                  Siguiente
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>

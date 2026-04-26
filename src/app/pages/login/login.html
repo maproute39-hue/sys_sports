@@ -1,0 +1,82 @@
+<div class="auth-wrapper min-vh-100 px-2">
+  <div class="row g-0 min-vh-100">
+    <div class="col-xl-5 col-lg-6 ms-auto px-sm-4 align-self-center py-4 d-none d-lg-block">
+      <img src="assets/images/auth/img.png" alt="" class="img-fluid" style="width: 100%;">
+    </div>
+
+    <div class="col-xl-5 col-lg-6 ms-auto px-sm-4 align-self-center py-4">
+      <div class="card card-body p-4 p-sm-5 maxw-450px m-auto rounded-4">
+        <div class="mb-4 text-center">
+          <a routerLink="/login" aria-label="Logo">
+            <img class="visible-light" src="assets/images/logo.svg" alt="Logo">
+          </a>
+        </div>
+
+        <div class="text-center mb-4">
+          <h5 class="mb-1">Bienvenido</h5>
+          <p>Inicia sesión para acceder al panel.</p>
+        </div>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <div class="mb-4">
+            <label class="form-label" for="identity">Correo o usuario</label>
+            <input
+              id="identity"
+              type="text"
+              class="form-control"
+              formControlName="identity"
+              placeholder="info@example.com">
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label" for="password">Contraseña</label>
+            <div class="password-wrapper">
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                class="form-control password-input"
+                id="password"
+                formControlName="password"
+                placeholder="********">
+
+              <button
+                type="button"
+                class="toggle-password"
+                (click)="togglePassword()"
+                [attr.aria-pressed]="showPassword"
+                [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+                <i class="close fi fi-rr-eye-crossed" aria-hidden="true"></i>
+                <i class="open fi fi-rr-eye" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <div class="d-flex justify-content-between">
+              <div class="form-check mb-0">
+                <input class="form-check-input" type="checkbox" id="rememberMe" formControlName="rememberMe">
+                <label class="form-check-label" for="rememberMe">
+                  Recordarme
+                </label>
+              </div>
+
+              <a routerLink="/forgot-password">¿Olvidaste tu contraseña?</a>
+            </div>
+          </div>
+
+          <div *ngIf="errorMessage" class="alert alert-danger">
+            {{ errorMessage }}
+          </div>
+
+          <div class="mb-3">
+            <button
+              type="submit"
+              class="btn btn-primary waves-effect waves-light w-100"
+              [disabled]="loading">
+              {{ loading ? 'Ingresando...' : 'Login' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,423 @@
+<main class="app-wrapper">
+
+  <div class="container-fluid">
+
+    <!-- Header -->
+    <div class="app-page-head d-flex align-items-center justify-content-between">
+      <div>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+              <a routerLink="/home">
+                <i class="fi fi-rr-home"></i> Home
+              </a>
+            </li>
+            <li class="breadcrumb-item active">Categorías</li>
+          </ol>
+        </nav>
+      </div>
+
+      <div>
+
+        <!-- <a routerLink="/nueva-categoria" class="btn btn-primary">
+          <i class="fi fi-rr-plus"></i> Nueva Categoría
+        </a> -->
+      </div>
+      
+    </div>
+
+    <!-- Buscador -->
+    <div class="row" *ngIf="!isLoading">
+      <div
+  class="alert alert-success"
+  role="alert"
+  *ngIf="getCategoriesWithMatches().length > 0">
+
+  <strong>Correcto:</strong>
+  {{ getCategoriesWithMatches().length }}
+  categorías ya tienen partidos programados:
+
+  <div class="mt-2">
+    <span
+      class="badge bg-success text-white me-1 mb-1"
+      *ngFor="let category of getCategoriesWithMatches()">
+      {{ category.name }}
+    </span>
+  </div>
+
+</div>
+    <div
+      class="alert alert-warning"
+      role="alert"
+      *ngIf="getCategoriesWithoutMatches().length > 0">
+
+      Hay
+      <strong>{{ getCategoriesWithoutMatches().length }}</strong>
+      categorías sin partidos programados:
+
+      <div class="mt-2"  >
+        <span
+        (click)="selectCategory(category)"
+style="cursor: pointer;"
+        class="badge bg-primary text-white me-1 mb-1"
+          *ngFor="let category of getCategoriesWithoutMatches()">
+          {{ category.name }}
+        </span>
+      </div>
+    </div>
+
+    <div
+      class="alert alert-success"
+      role="alert"
+      *ngIf="getCategoriesWithoutMatches().length === 0">
+
+      Todas las categorías tienen partidos programados.
+    </div>
+
+    <div class="alert alert-danger" role="alert">
+      Puedes
+      <a
+        href="javascript:void(0);"
+        class="alert-link"
+        (click)="deleteAllMatches()">
+        borrar toda la información de partidos
+      </a>
+      existente en la base de datos.
+    </div>
+      <div [ngClass]="selectedCategory ? 'col-lg-5' : 'col-12'">
+        <div class="row">
+          <div class="card-body">
+            
+            <button class="btn btn-sm btn-outline-primary" (click)="toggleCategories()">
+              <i class="fi" [ngClass]="showCategories ? 'fi-rr-angle-left' : 'fi-rr-angle-right'"></i>
+              {{ showCategories ? 'Ocultar categorías' : 'Mostrar categorías' }}
+            </button>
+            <!-- <div class="input-group"  *ngIf="showCategories">
+              <span class="input-group-text">
+                <i class="fi fi-rr-search"></i>
+              </span>
+              <input type="text" class="form-control" placeholder="Buscar categoría..." [(ngModel)]="searchTerm" />
+            </div> -->
+
+            <small class="text-muted mt-2 d-block" *ngIf="showCategories">
+              Mostrando {{ filteredCategories.length }} de {{ categories.length }} categorías
+            </small>
+
+
+
+
+            
+                    <div class="card mb-3" *ngIf="categories.length > 0">
+  <div class="card-header">
+    <h6 class="card-title mb-0">Estado de programación</h6>
+  </div>
+
+  <div class="card-body">
+
+
+  </div>
+</div>
+          </div>
+  
+        </div>
+
+
+
+      </div>
+
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="text-center py-5">
+
+      <div class="spinner-border text-primary"></div>
+      <p class="mt-2 text-muted">Cargando categorías...</p>
+    </div>
+
+    <div class="row" *ngIf="!isLoading">
+
+
+      <!-- COLUMNA IZQUIERDA: CATEGORÍAS -->
+      <div *ngIf="showCategories" [ngClass]="selectedCategory ? 'col-lg-6' : 'col-12'">
+        <div class="row">
+
+          <div *ngFor="let category of filteredCategories; trackBy: trackByCategoryId"
+            [ngClass]="selectedCategory ? 'col-md-6 mb-3' : 'col-xl-3 col-lg-4 col-md-6 mb-3'">
+            <div class="card h-100 shadow-sm category-card" (click)="selectCategory(category)" [ngClass]="{
+              'no-teams': getTeamsCountByCategory(category) === 0,
+  'selected-category': selectedCategory?.id === category.id,
+  'category-with-matches': hasMatches(category)
+          }">
+              <div class="card-body d-flex flex-column">
+                <h5 class="card-title">
+                  <i class="fi fi-rr-apps me-2"></i>
+                  {{ category.name }}
+                </h5>
+
+                <p class="text-muted mb-3">
+                  {{ category.description }}
+                </p>
+
+                <div class="mt-auto">
+                  <span *ngIf="getTeamsCountByCategory(category) === 0" class="badge bg-danger">
+                    Sin equipos
+                  </span>
+
+                  <span *ngIf="getTeamsCountByCategory(category) > 0" class="badge bg-primary">
+                    {{ getTeamsCountByCategory(category) }}
+                    {{ getTeamsCountByCategory(category) === 1 ? 'equipo' : 'equipos' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- COLUMNA DERECHA: GRUPOS -->
+      <div [ngClass]="showCategories ? 'col-lg-6' : 'col-lg-6 col-12'" *ngIf="selectedCategory">
+        <div class="card shadow-sm groups-panel">
+          <div class="card-body">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <h5 class="mb-0">
+                  Grupos de {{ selectedCategory.name }}
+                </h5>
+                <small class="text-muted">
+                  {{ getGroupsBySelectedCategory().length }} grupos encontrados
+                </small>
+              </div>
+
+              <!-- <button
+  class="btn btn-sm me-2"
+  [ngClass]="savedMatches.length > 0 ? 'btn-danger' : 'btn-primary'"
+  type="button"
+  (click)="onMatchesAction()">
+
+  <ng-container *ngIf="savedMatches.length === 0">
+    Programar partidos
+  </ng-container>
+
+  <ng-container *ngIf="savedMatches.length > 0">
+    Resetear partidos de categoría
+  </ng-container>
+
+</button> -->
+              <button class="btn btn-sm btn-outline-secondary" (click)="clearSelectedCategory()">
+                Cerrar
+              </button>
+            </div>
+            <div *ngIf="selectedCategory && savedMatches.length === 0 && generatedMatches.length === 0"
+              class="alert alert-warning mt-3" role="alert">
+
+              Esta categoría no tiene partidos programados aún.
+
+              <a href="javascript:void(0);" class="alert-link ms-1" (click)="generateMatchesForSelectedCategory()">
+                Haz click aquí
+              </a>
+              para programar partidos.
+
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3" *ngFor="let group of getGroupsBySelectedCategory()">
+                <div class="card h-100 group-card">
+                  <div class="card-body">
+                    <h6 class="mb-2">
+                      <i class="fi fi-rr-users-alt me-2"></i>
+                      {{ group.name }}
+                    </h6>
+
+                    <small class="text-muted d-block mb-2">
+                      {{ getTeamsByGroup(group).length }}
+                      {{ getTeamsByGroup(group).length === 1 ? 'equipo' : 'equipos' }}
+                    </small>
+
+                    <ul class="list-group list-group-flush" *ngIf="getTeamsByGroup(group).length > 0">
+                      <li class="list-group-item d-flex align-items-center gap-2 px-0 py-1"
+                        *ngFor="let team of getTeamsByGroup(group)">
+
+                        <!-- SI TIENE IMAGEN -->
+                        <ng-container *ngIf="getMainImageUrl(team); else noImage">
+                          <img [src]="getMainImageUrl(team)" alt="Icono de equipo"
+                            class="avatar avatar-xxs rounded-circle">
+                        </ng-container>
+
+                        <!-- SI NO TIENE IMAGEN -->
+                        <ng-template #noImage>
+                          <div
+                            class="avatar avatar-xxs rounded-circle d-flex align-items-center justify-content-center bg-light border">
+                            <i class="fi fi-rr-warning text-danger"></i>
+                          </div>
+                        </ng-template>
+
+                        <span>{{ team.name }}</span>
+
+                      </li>
+                    </ul>
+
+                    <div *ngIf="getTeamsByGroup(group).length === 0" class="text-muted small">
+                      Este grupo no tiene equipos.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+              <div *ngIf="getGroupsBySelectedCategory().length === 0" class="col-12">
+                <div class="text-center py-4 text-muted">
+                  Esta categoría no tiene grupos registrados.
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <!-- Columm tercera para ver partidos-->
+      <div [ngClass]="showCategories ? 'col-lg-6' : 'col-lg-6 col-12'" *ngIf="generatedMatches.length > 0">
+        <!-- <button
+  class="btn btn-success btn-sm mb-3"
+  type="button"
+  (click)="saveGeneratedMatches()"
+  [disabled]="isLoading || generatedMatches.length === 0">
+  Guardar partidos
+</button> -->
+        <!-- <button
+  class="btn btn-success btn-sm mb-3"
+  type="button"
+  (click)="saveGeneratedMatches()"
+  [disabled]="isSavingMatches || generatedMatches.length === 0">
+  {{ isSavingMatches ? 'Guardando partidos...' : 'Guardar partidos' }}
+</button> -->
+        <h5 class="mb-3">Partidos propuestos</h5>
+        <div *ngIf="generatedMatches.length > 0" class="alert alert-success" role="alert">
+
+          Debes
+          <a href="javascript:void(0);" class="alert-link" (click)="saveGeneratedMatches()">
+            guardar
+          </a>
+          los partidos propuestos.
+
+        </div>
+        <!-- Tabs de jornadas -->
+        <ul class="nav nav-tabs mb-3">
+          <li class="nav-item" *ngFor="let round of getGeneratedRounds()">
+            <button type="button" class="nav-link" [class.active]="activeRound === round.round"
+              (click)="setActiveRound(round.round)">
+              Jornada {{ round.round }}
+            </button>
+          </li>
+        </ul>
+
+        <!-- Contenido de la jornada activa -->
+        <ng-container *ngFor="let round of getGeneratedRounds()">
+          <div class="card" *ngIf="activeRound === round.round">
+
+            <div class="card-header fw-bold">
+              Jornada {{ round.round }}
+            </div>
+
+            <div class="card-body">
+              <div class="match-row" *ngFor="let match of round.matches; let i = index">
+
+                <!-- Local -->
+                <div class="team team-left" style="cursor: pointer;">
+                  <span>{{ match.homeTeam.name }}</span>
+                  <img [src]="getMainImageUrl(match.homeTeam)" class="avatar avatar-xs rounded-circle">
+                </div>
+
+                <!-- VS -->
+                <div class="vs">
+                  VS
+                </div>
+
+                <!-- Visitante -->
+                <div class="team team-right" style="cursor: pointer;">
+                  <img [src]="getMainImageUrl(match.awayTeam)" class="avatar avatar-xs rounded-circle">
+                  <span>{{ match.awayTeam.name }}</span>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </ng-container>
+
+      </div>
+      <!-- PARTIDOS GUARDADOS -->
+      <div [ngClass]="showCategories ? 'col-lg-6' : 'col-lg-6 col-12'"
+        *ngIf="savedMatches.length > 0 && generatedMatches.length === 0">
+
+        <h5 class="mb-3">Partidos guardados</h5>
+
+        <ul class="nav nav-tabs mb-3">
+          <li class="nav-item" *ngFor="let round of getSavedRounds()">
+            <button type="button" class="nav-link" [class.active]="activeRound === round.round"
+              (click)="setActiveRound(round.round)">
+              Jornada {{ round.round }}
+            </button>
+          </li>
+        </ul>
+
+        <ng-container *ngFor="let round of getSavedRounds()">
+          <div class="card" *ngIf="activeRound === round.round">
+            <div class="card-header fw-bold">
+              Jornada {{ round.round }}
+            </div>
+
+            <div class="card-body">
+              <div class="match-row saved-match-row" *ngFor="let match of round.matches"
+                (click)="openMatchResultModal(match)">
+
+                <div class="team team-left">
+                  <span>{{ match.home_team_name }}</span>
+                  <img [src]="getSavedMatchImageUrl(match, 'home')" class="avatar avatar-xs rounded-circle">
+
+                </div>
+                <div class="vs text-center">
+
+                  <div><strong>VS</strong></div>
+
+                  <div *ngIf="match.sets?.length" class="sets-columns mt-1">
+
+                    <div class="set-column" *ngFor="let set of match.sets" style="margin-left: 20px; margin-right: 20px;">
+
+                      <span class="btn btn-sm" [ngClass]="{
+          'btn-outline-success border-dashed waves-effect waves-light': set.home_points > set.away_points,
+          'btn-outline-danger border-dashed waves-effect waves-light': set.home_points < set.away_points
+        }">
+                        {{ set.home_points }}
+                      </span>
+
+                      <span class="btn btn-sm  mt-1" [ngClass]="{
+          'btn-outline-success border-dashed waves-effect waves-light ': set.away_points > set.home_points,
+          'btn-outline-danger border-dashed waves-effect waves-light ': set.away_points < set.home_points
+        }">
+                        {{ set.away_points }}
+                      </span>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+                <div class="team team-right">
+                  <img [src]="getSavedMatchImageUrl(match, 'away')" class="avatar avatar-xs rounded-circle">
+
+                  <span>{{ match.away_team_name }}</span>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+  </div>
+
+</main>

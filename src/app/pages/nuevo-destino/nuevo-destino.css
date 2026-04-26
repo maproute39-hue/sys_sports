@@ -1,0 +1,92 @@
+.destination-form-card {
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.destination-form-card .card-header {
+  padding: 1rem 1.25rem;
+}
+
+.destination-form-card .card-body {
+  padding: 1.5rem;
+}
+
+.form-section,
+.side-block {
+  width: 100%;
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #1e2a3b;
+}
+
+.section-divider {
+  margin: 1.5rem 0;
+  opacity: 0.12;
+}
+
+.form-label {
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.form-control,
+.form-select {
+  min-height: 44px;
+}
+
+textarea.form-control {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.side-panel {
+  position: sticky;
+  top: 20px;
+}
+
+.preview-box {
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 10px;
+  background: #fff;
+}
+
+.preview-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.gallery-thumb {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+}
+
+.d-grid.gap-2 .btn {
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+.btn.btn-primary {
+  font-weight: 600;
+}
+
+@media (max-width: 991.98px) {
+  .side-panel {
+    position: static;
+  }
+
+  .destination-form-card .card-body {
+    padding: 1rem;
+  }
+}

@@ -1,0 +1,45 @@
+.card-stack {
+  display: flex;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.card-stack-item {
+  position: relative;
+  transition: transform 0.35s ease, z-index 0.35s ease;
+  transform-origin: bottom center;
+  z-index: 1;
+}
+
+/* Efecto baraja */
+.card-stack-item.card-rotate-1 {
+  transform: rotate(-6deg);
+}
+
+.card-stack-item.card-rotate-2 {
+  transform: rotate(-3deg);
+}
+
+.card-stack-item.card-rotate-3 {
+  transform: rotate(3deg);
+}
+
+.card-stack-item.card-rotate-4 {
+  transform: rotate(6deg);
+}
+
+/* La card interna también anima sombra */
+.team-card {
+  transition: box-shadow 0.35s ease, transform 0.35s ease;
+  cursor: pointer;
+}
+
+/* Hover: se endereza y se eleva */
+.card-stack-item:hover {
+  transform: translateY(-22px) scale(1.05) rotate(0deg);
+  z-index: 20;
+}
+
+.card-stack-item:hover .team-card {
+  box-shadow: 0 22px 45px rgba(0, 0, 0, 0.28);
+}

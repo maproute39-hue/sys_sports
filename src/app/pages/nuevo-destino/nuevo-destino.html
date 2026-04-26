@@ -1,0 +1,281 @@
+<main class="app-wrapper">
+  <div class="container-fluid">
+    <div class="app-page-head">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a routerLink="/home">
+              <i class="fi fi-rr-home"></i> Home
+            </a>
+          </li>
+          <li class="breadcrumb-item">
+            <a routerLink="/destinations">Destinos</a>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">
+            Nuevo destino
+          </li>
+        </ol>
+      </nav>
+    </div>
+
+    <form [formGroup]="destinationForm" (ngSubmit)="onSubmit()">
+      <div class="card destination-form-card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Nuevo destino</h5>
+        </div>
+
+        <div class="card-body">
+          <div class="row g-4">
+            <!-- Columna izquierda -->
+            <div class="col-lg-8">
+              <!-- Información principal -->
+              <div class="form-section mb-4">
+                <h6 class="section-title">Información principal</h6>
+
+                <div class="row align-items-center mb-3">
+                  <div class="col-sm-3">
+                    <label class="form-label mb-sm-0">Nombre *</label>
+                  </div>
+                  <div class="col-sm-9">
+                    <input
+                      type="text"
+                      class="form-control"
+                      formControlName="name"
+                      placeholder="Ej: Cartagena"
+                    />
+                    <small class="text-danger" *ngIf="isInvalid('name')">
+                      El nombre es obligatorio.
+                    </small>
+                  </div>
+                </div>
+
+                <div class="row align-items-center mb-3">
+                  <div class="col-sm-3">
+                    <label class="form-label mb-sm-0">Slug *</label>
+                  </div>
+                  <div class="col-sm-9">
+                    <input
+                      type="text"
+                      class="form-control"
+                      formControlName="slug"
+                      placeholder="Ej: cartagena"
+                    />
+                    <small class="text-muted d-block mt-1">
+                      URL amigable. Ejemplo: cartagena, santa-marta, san-andres
+                    </small>
+                    <small class="text-danger" *ngIf="isInvalid('slug')">
+                      El slug es obligatorio.
+                    </small>
+                  </div>
+                </div>
+
+                <div class="row align-items-center mb-3">
+                  <div class="col-sm-3">
+                    <label class="form-label mb-sm-0">País *</label>
+                  </div>
+                  <div class="col-sm-9">
+                    <input
+                      type="text"
+                      class="form-control"
+                      formControlName="country"
+                      placeholder="Ej: Colombia"
+                    />
+                    <small class="text-danger" *ngIf="isInvalid('country')">
+                      El país es obligatorio.
+                    </small>
+                  </div>
+                </div>
+
+                <div class="row align-items-center mb-3">
+                  <div class="col-sm-3">
+                    <label class="form-label mb-sm-0">Región / Departamento</label>
+                  </div>
+                  <div class="col-sm-9">
+                    <input
+                      type="text"
+                      class="form-control"
+                      formControlName="region"
+                      placeholder="Ej: Bolívar"
+                    />
+                  </div>
+                </div>
+
+                <div class="row align-items-center mb-0">
+                  <div class="col-sm-3">
+                    <label class="form-label mb-sm-0">Ciudad</label>
+                  </div>
+                  <div class="col-sm-9">
+                    <input
+                      type="text"
+                      class="form-control"
+                      formControlName="city"
+                      placeholder="Ej: Cartagena de Indias"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <hr class="section-divider" />
+
+              <!-- Descripción -->
+              <div class="form-section mb-4">
+                <h6 class="section-title">Descripción</h6>
+
+                <div class="mb-3">
+                  <label class="form-label">Descripción corta</label>
+                  <textarea
+                    class="form-control"
+                    rows="3"
+                    formControlName="shortDescription"
+                    placeholder="Resumen corto para tarjetas o listados"
+                  ></textarea>
+                </div>
+
+                <div class="mb-0">
+                  <label class="form-label">Descripción completa</label>
+                  <textarea
+                    class="form-control"
+                    rows="6"
+                    formControlName="fullDescription"
+                    placeholder="Información detallada del destino"
+                  ></textarea>
+                </div>
+              </div>
+
+              <hr class="section-divider" />
+
+              <!-- Imágenes -->
+              <div class="form-section">
+                <h6 class="section-title">Imágenes</h6>
+
+                <div class="mb-3">
+                  <label for="mainImage" class="form-label">Imagen principal</label>
+                  <input
+                    class="form-control"
+                    type="file"
+                    id="mainImage"
+                    accept="image/*"
+                    (change)="onMainImageChange($event)"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="gallery" class="form-label">Galería</label>
+                  <input
+                    class="form-control"
+                    type="file"
+                    id="gallery"
+                    accept="image/*"
+                    multiple
+                    (change)="onGalleryChange($event)"
+                  />
+                </div>
+
+                <div class="row" *ngIf="mainImagePreview">
+                  <div class="col-md-4 mb-3">
+                    <div class="preview-box">
+                      <p class="preview-title">Portada</p>
+                      <img
+                        [src]="mainImagePreview"
+                        alt="Vista previa"
+                        class="img-fluid rounded"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row" *ngIf="galleryPreviews.length">
+                  <div class="col-12">
+                    <p class="preview-title mb-2">Galería</p>
+                  </div>
+
+                  <div class="col-md-3 col-6 mb-3" *ngFor="let img of galleryPreviews">
+                    <div class="preview-box">
+                      <img
+                        [src]="img"
+                        alt="Galería"
+                        class="img-fluid rounded gallery-thumb"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Columna derecha -->
+            <div class="col-lg-4">
+              <div class="side-panel">
+                <div class="side-block mb-4">
+                  <h6 class="section-title">Estado y visibilidad</h6>
+
+                  <div class="form-check form-switch mb-3">
+                    <input
+                      class="form-check-input switch-success"
+                      type="checkbox"
+                      id="isFeatured"
+                      formControlName="isFeatured"
+                    />
+                    <label class="form-check-label" for="isFeatured">
+                      Destino destacado
+                    </label>
+                  </div>
+
+                  <div class="form-check form-switch mb-0">
+                    <input
+                      class="form-check-input switch-primary"
+                      type="checkbox"
+                      id="isActive"
+                      formControlName="isActive"
+                    />
+                    <label class="form-check-label" for="isActive">
+                      Activo
+                    </label>
+                  </div>
+                </div>
+
+                <hr class="section-divider" />
+
+                <div class="side-block mb-4">
+                  <h6 class="section-title">Recomendaciones</h6>
+                  <ul class="mb-0 ps-3 small">
+                    <li>Usa un nombre corto y claro.</li>
+                    <li>El slug debe ir en minúsculas y con guiones.</li>
+                    <li>La imagen principal debe ser la mejor portada del destino.</li>
+                    <li>La descripción corta se usará en tarjetas y listados.</li>
+                  </ul>
+                </div>
+
+                <hr class="section-divider" />
+
+                <div class="side-block">
+                  <h6 class="section-title">Acciones</h6>
+
+                  <div class="d-grid gap-2">
+                    <button
+                      type="submit"
+                      class="btn btn-primary"
+                      [disabled]="loading"
+                    >
+                      <span *ngIf="!loading">Guardar destino</span>
+                      <span *ngIf="loading">Guardando...</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      class="btn btn-light"
+                      routerLink="/destinations"
+                      [disabled]="loading"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- /col derecha -->
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</main>

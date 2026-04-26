@@ -1,0 +1,142 @@
+  <main class="app-wrapper">
+
+      <div class="container-fluid">
+
+        <div class="app-page-head d-flex align-items-center justify-content-between">
+          <div class="clearfix">
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                  <a routerLink="/home">
+                    <i class="fi fi-rr-home"></i> Home
+                  </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Listado de destinos</li>
+              </ol>
+            </nav>
+          </div>
+          <div>
+            <a routerLink="../nuevoDestino" class="btn btn-primary">
+              <i class="fi fi-rr-plus"></i> Nuevo destino
+            </a>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando equipos...</span>
+          </div>
+          <p class="mt-2 text-muted">Cargando equipos...</p>
+        </div>
+
+        <!-- Destinations Grid -->
+        <div class="row" *ngIf="!isLoading">
+          <div
+            *ngFor="let destination of destinations; trackBy: trackByDestinationId"
+            class="col-xxl-3 col-lg-4 col-md-6 mb-4"
+          >
+            <div class="card destination-card h-100">
+              <div class="card-img-wrapper">
+                <img
+                  [src]="getMainImageUrl(destination)"
+                  [alt]="destination.name"
+                  class="card-img-top"
+                  loading="lazy"
+                />
+                <div class="card-img-overlay d-flex justify-content-between align-items-start">
+                  <span [class]="getStatusClass(destination)" class="badge">
+                    {{ getStatusText(destination) }}
+                  </span>
+                  <div class="dropdown">
+                    <button
+                      class="btn btn-sm btn-outline-light rounded-pill"
+                      type="button"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                    >
+                      <i class="fi fi-rr-menu-dots"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                      <li><a class="dropdown-item" href="#" (click)="editDestination(destination); $event.preventDefault()">Editar</a></li>
+                      <li><a class="dropdown-item text-danger" href="#" (click)="deleteDestination(destination); $event.preventDefault()">Eliminar</a></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card-body d-flex flex-column">
+                <h5 class="card-title mb-2">
+                  <a [routerLink]="['/destino', destination.slug]" class="text-decoration-none">
+                    {{ destination.name }}
+                  </a>
+                </h5>
+
+                <div class="card-meta mb-3">
+                  <small class="text-muted d-block">
+                    <i class="fi fi-rr-marker me-1"></i>
+                    {{ destination.city }}, {{ destination.country }}
+                  </small>
+                  <small class="text-muted d-block" *ngIf="destination.created">
+                    <i class="fi fi-rr-calendar me-1"></i>
+                    {{ formatDate(destination.created) }}
+                  </small>
+                </div>
+
+                <p class="card-text flex-grow-1">
+                  {{ destination.shortDescription || 'Sin descripción corta disponible.' }}
+                </p>
+
+                <div class="card-actions mt-auto">
+                  <a [routerLink]="['/destino', destination.slug]" class="btn btn-outline-primary btn-sm">
+                    Ver detalles
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div *ngIf="destinations.length === 0" class="col-12">
+            <div class="text-center py-5">
+              <div class="empty-state-icon mb-3">
+                <i class="fi fi-rr-map-marked-alt display-1 text-muted"></i>
+              </div>
+              <h4 class="text-muted">No hay destinos registrados</h4>
+              <p class="text-muted mb-4">
+                Comienza creando tu primer destino turístico.
+              </p>
+              <a routerLink="nuevo-destino" class="btn btn-primary">
+                <i class="fi fi-rr-plus"></i> Crear primer destino
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center">
+          <ul class="pagination justify-content-center">
+            <li class="page-item">
+              <a class="page-link" href="javascript:void(0);" aria-label="Previous">
+                <span aria-hidden="true">«</span>
+              </a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="javascript:void(0);">1</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="javascript:void(0);">2</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="javascript:void(0);">3</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="javascript:void(0);" aria-label="Next">
+                <span aria-hidden="true">»</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+    </main>

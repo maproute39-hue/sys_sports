@@ -1,0 +1,183 @@
+.category-card {
+  transition: all 0.2s ease;
+  border-radius: 12px;
+}
+
+.category-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.card-title {
+  font-weight: 600;
+}
+
+.input-group-text {
+  background: #f8f9fa;
+}
+.category-card.no-teams {
+  background: rgba(220, 53, 69, 0.08); /* rojo suave */
+  border: 1px solid rgba(220, 53, 69, 0.25);
+}
+
+/* opcional: efecto visual más claro */
+.category-card.no-teams .card-title {
+  color: #dc3545;
+}
+
+/* hover más notorio */
+.category-card.no-teams:hover {
+  background: rgba(220, 53, 69, 0.15);
+  transform: translateY(-3px);
+  transition: all 0.2s ease;
+}
+.category-card.no-teams::after {
+  content: '⚠';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 18px;
+  opacity: 0.6;
+}
+.category-card {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.category-card:hover {
+  transform: translateY(-3px);
+}
+
+.category-card.no-teams {
+  background: rgba(220, 53, 69, 0.08);
+  border: 1px solid rgba(220, 53, 69, 0.25);
+}
+
+.category-card.selected-category {
+  border: 2px solid #0d6efd;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15) !important;
+}
+
+.groups-panel {
+  position: sticky;
+  top: 90px;
+}
+
+.group-card {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.group-card .list-group-item {
+  font-size: 0.85rem;
+  background: transparent;
+}
+.avatar-xxs {
+  width: 24px;
+  height: 24px;
+  object-fit: cover;
+}
+
+.avatar i {
+  font-size: 12px;
+}
+.match-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr; /* clave */
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.team {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* alineaciones */
+.team-left {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.team-right {
+  justify-content: flex-start;
+}
+
+.vs {
+  text-align: center;
+  font-weight: bold;
+  color: #666;
+  min-width: 40px; /* mantiene consistencia */
+}
+.team {
+  position: relative;
+}
+
+.team img {
+  transition: transform 0.25s ease;
+  will-change: transform;
+}
+
+/* efecto individual */
+.team:hover img {
+  transform: scale(1.7);
+  z-index: 10;
+}
+.match-score-fixed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.score-row {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.score-row .badge {
+  min-width: 32px;
+  padding: 6px 8px;
+  font-weight: 700;
+}
+.swal-rounded {
+  border-radius: 20px !important;
+  padding: 20px !important;
+}
+
+.swal2-title {
+  font-weight: 700;
+}
+
+.swal2-actions button {
+  border-radius: 10px !important;
+}.saved-match-row {
+  cursor: pointer;
+  border-radius: 14px;
+  padding: 10px 14px;
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    background-color 0.22s ease,
+    border-color 0.22s ease;
+  border: 1px solid transparent;
+}
+
+.saved-match-row:hover {
+  background-color: #eef2ff;
+  border-color: #c7d2fe;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(79, 70, 229, 0.18);
+}
+.category-with-matches {
+  background-color: #e8f7ee; /* verde suave */
+  border: 1px solid #b7e4c7;
+  transition: all 0.3s ease;
+}
+
+.category-with-matches:hover {
+  background-color: #d1f0dc;
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(25, 135, 84, 0.2);
+}
