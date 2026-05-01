@@ -7,10 +7,10 @@
           <ol class="breadcrumb mb-0">
             <li class="breadcrumb-item">
               <a href="javascript:void(0)">
-                <i class="fi fi-rr-home"></i> Home
+                <i class="fi fi-rr-home"></i> Inicio
               </a>
             </li>
-            <li class="breadcrumb-item active" aria-current="page">Finance</li>
+            <li class="breadcrumb-item active" aria-current="page">Torneos</li>
           </ol>
         </nav>
       </div>
@@ -30,8 +30,8 @@
                   <i class="fi fi-rr-coins"></i>
                 </div>
                 <div class="clearfix">
-                  <span class="fw-semibold text-muted">Ingresos cobrados del mes</span>
-                  <h2 class="fw-bold mb-0 mt-1">{{ monthlyIncome | currency:'USD':'symbol':'1.0-0' }}</h2>
+                  <span class="fw-semibold text-muted">Equipos</span>
+                  <h2 class="fw-bold mb-0 mt-1">{{ totalTeams }}</h2>
                 </div>
               </div>
             </div>
@@ -44,8 +44,8 @@
                   <i class="fi fi-rr-calendar"></i>
                 </div>
                 <div class="clearfix">
-                  <span class="fw-semibold text-muted">Reservas confirmadas del mes</span>
-                  <h2 class="fw-bold mb-0 mt-1">{{ confirmedBookings }}</h2>
+                  <span class="fw-semibold text-muted">Grupos</span>
+                  <h2 class="fw-bold mb-0 mt-1">{{ totalGroups }}</h2>
                 </div>
               </div>
             </div>
@@ -58,8 +58,8 @@
                   <i class="fi fi-rr-chart-histogram"></i>
                 </div>
                 <div class="clearfix">
-                  <span class="fw-semibold text-muted">Saldo pendiente</span>
-                  <h2 class="fw-bold mb-0 mt-1">{{ pendingBalance | currency:'USD':'symbol':'1.0-0' }}</h2>
+                  <span class="fw-semibold text-muted">Categorias</span>
+                  <h2 class="fw-bold mb-0 mt-1">{{totalCategories }}</h2>
                 </div>
               </div>
             </div>
@@ -72,15 +72,15 @@
                   <i class="fi fi-rr-objects-column"></i>
                 </div>
                 <div class="clearfix">
-                  <span class="fw-semibold text-muted">Cotizaciones del mes</span>
-                  <h2 class="fw-bold mb-0 mt-1">{{ monthlyQuotes }}</h2>
+                  <span class="fw-semibold text-muted">Divisiones</span>
+                  <h2 class="fw-bold mb-0 mt-1">{{ totalDivisions }}</h2>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- Gráfico principal -->
-          <div class="col-lg-8">
+          <!-- <div class="col-lg-8">
             <div class="card h-100">
               <div class="card-header border-0 d-flex pb-0 justify-content-between align-items-center">
                 <h6 class="card-title mb-0">Cotizaciones vs Reservas por mes</h6>
@@ -99,10 +99,10 @@
                   [tooltip]="summaryChartOptions.tooltip!"></apx-chart>
               </div>
             </div>
-          </div>
+          </div> -->
 
           <!-- Donut reservas por estado -->
-          <div class="col-xl-4 col-lg-6">
+          <!--  <div class="col-xl-4 col-lg-6">
             <div class="card h-100">
               <div class="card-header d-flex flex-wrap gap-3 align-items-center justify-content-between border-0 pb-0">
                 <h6 class="card-title mb-0">Reservas por estado</h6>
@@ -113,13 +113,13 @@
                   [legend]="leadsChartOptions.legend!"></apx-chart>
               </div>
             </div>
-          </div>
+          </div> -->
 
         </div>
       </div>
 
       <!-- COLUMNA DERECHA -->
-      <div class="col-xxl-3 col-xl-4">
+      <!-- <div class="col-xxl-3 col-xl-4">
         <div class="card overflow-hidden bg-primary ovarlay-primary-gradient border-0"
           style="background-image: url(assets/images/wind.gif); background-position: center; background-size: cover;">
           <div
@@ -170,10 +170,10 @@
             </div>
           </div>
         </div>
-      </div>
+      </div> -->
 
       <!-- TASA DE CONVERSIÓN -->
-      <div class="col-xxl-3 col-lg-4 col-md-6">
+      <!--  <div class="col-xxl-6 col-lg-6 col-md-6">
         <div class="card overflow-hidden h-100">
           <div class="card-header pb-0 border-0">
             <h6 class="card-title mb-0">Tasa de conversión</h6>
@@ -209,10 +209,10 @@
             </div>
           </div>
         </div>
-      </div>
+      </div> -->
 
       <!-- TOP DESTINOS -->
-      <div class="col-xxl-3 col-lg-4 col-md-6">
+      <!-- <div class="col-xxl-6 col-lg-4 col-md-6">
         <div class="card h-100">
           <div class="card-header border-0 pb-0 d-flex align-items-center justify-content-between">
             <h6 class="card-title mb-0">Top destinos</h6>
@@ -244,16 +244,16 @@
 
           </div>
         </div>
-      </div>
+      </div> -->
 
       <!-- ÚLTIMAS RESERVAS -->
-      <div class="col-lg-6">
+      <div class="col-lg-12">
         <div class="card">
           <div class="card-header d-flex flex-wrap gap-3 align-items-center justify-content-between border-0 pb-0">
-            <h6 class="card-title mb-0">Últimas reservas</h6>
+            <h6 class="card-title mb-0">Listado de equipos</h6>
 
-            <input type="text" class="form-control form-control-sm w-auto" placeholder="Buscar" [(ngModel)]="searchTerm"
-              (ngModelChange)="onSearchChange()" />
+            <input type="text" class="form-control form-control-sm w-auto" placeholder="Buscar equipo"
+              [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" />
           </div>
 
           <div class="card-body px-1 pt-2 pb-2">
@@ -261,44 +261,40 @@
               <table class="table table-sm table-row-rounded align-middle">
                 <thead class="table-light">
                   <tr>
-                    <th class="minw-150px">Nombre</th>
+                    <th class="minw-150px">Equipo</th>
                     <th class="minw-150px">Fecha</th>
-                    <th class="minw-200px">Descripción</th>
+                    <th class="minw-200px">Grupo</th>
                     <th>Categoría</th>
-                    <th>Importe</th>
-                    <th>Status</th>
+                    <th>Estado</th>
                   </tr>
                 </thead>
+
                 <tbody>
-                  <tr *ngFor="let item of paginatedReservations">
+                  <tr *ngFor="let team of paginatedTeams; trackBy: trackByTeamId">
                     <td>
                       <div class="d-flex align-items-center">
                         <div class="avatar avatar-xxs rounded-circle me-2">
-                          <img [src]="item.avatar" [alt]="item.name">
+                          <img [src]="getMainImageUrl(team)" [alt]="team.name">
                         </div>
-                        {{ item.name }}
+                        {{ team.name }}
                       </div>
                     </td>
-                    <td>{{ item.date }}</td>
-                    <td>{{ item.description }}</td>
-                    <td>{{ item.category }}</td>
-                    <td [ngClass]="item.amount >= 0 ? 'text-success fw-bold' : 'text-danger fw-bold'">
-                      {{ item.amount >= 0 ? '+' : '-' }}{{ Math.abs(item.amount) | currency:'USD':'symbol':'1.0-0' }}
-                    </td>
+
+                    <td>{{ team.created | date:'dd/MM/yyyy' }}</td>
+
+                    <td>{{ getGroupName(team.group_id) }}</td>
+
+                    <td>{{ getCategoryName(team.category_id) }}</td>
                     <td>
-                      <span class="badge badge-lg" [ngClass]="{
-                          'bg-success-subtle text-success': item.status === 'Completed',
-                          'bg-danger-subtle text-danger': item.status === 'Paid',
-                          'bg-warning-subtle text-warning': item.status === 'Pending'
-                        }">
-                        {{ item.status }}
+                      <span class="badge badge-lg" [ngClass]="getStatusClass(team)">
+                       <!--  {{ getStatusText(team) }} --> -
                       </span>
                     </td>
                   </tr>
 
-                  <tr *ngIf="paginatedReservations.length === 0">
-                    <td colspan="6" class="text-center text-muted py-4">
-                      No se encontraron registros.
+                  <tr *ngIf="paginatedTeams.length === 0">
+                    <td colspan="5" class="text-center text-muted py-4">
+                      No se encontraron equipos.
                     </td>
                   </tr>
                 </tbody>
@@ -308,11 +304,11 @@
             <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mt-3 px-2">
               <small class="text-muted">
                 Mostrando
-                {{ filteredReservations.length ? ((currentPage - 1) * pageSize + 1) : 0 }}
+                {{ filteredTeams.length ? ((currentPage - 1) * pageSize + 1) : 0 }}
                 a
                 {{ getShowingTo() }}
                 de
-                {{ filteredReservations.length }} entradas
+                {{ filteredTeams.length }} equipos
               </small>
 
               <div class="btn-group">
@@ -332,7 +328,6 @@
                 </button>
               </div>
             </div>
-
           </div>
         </div>
       </div>

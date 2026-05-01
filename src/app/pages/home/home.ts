@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import PocketBase from 'pocketbase';
 import {
   ApexAxisChartSeries,
   ApexChart,
@@ -69,6 +71,28 @@ interface ReservationItem {
   amount: number;
   status: 'Completed' | 'Paid' | 'Pending';
 }
+export interface Team {
+  id: string;
+  name: string;
+  logo?: string;
+  category_id?: string;
+  group_id?: string;
+  created?: string;
+  image_logo?: string;
+  isFeatured?: boolean;
+  isActive?: boolean;
+
+  expand?: {
+    group_id?: {
+      id: string;
+      name: string;
+    };
+    category_id?: {
+      id: string;
+      name: string;
+    };
+  };
+}
 
 @Component({
   selector: 'app-home',
@@ -118,29 +142,27 @@ export class Home {
   selectedPeriod: 'thisYear' | 'lastYear' = 'thisYear';
 
   // búsqueda y paginación tabla
-  searchTerm = '';
-  currentPage = 1;
-  pageSize = 5;
-conversionSegments = [
-  {
-    label: 'Pagos',
-    value: 79,
-    progressClass: 'bg-primary',
-    textClass: 'text-primary'
-  },
-  {
-    label: 'Cancelados',
-    value: 22,
-    progressClass: 'bg-primary bg-opacity-75',
-    textClass: 'text-primary text-opacity-75'
-  },
-  {
-    label: 'Devoluciones',
-    value: 3,
-    progressClass: 'bg-primary bg-opacity-50',
-    textClass: 'text-primary text-opacity-50'
-  }
-];
+
+  conversionSegments = [
+    {
+      label: 'Pagos',
+      value: 79,
+      progressClass: 'bg-primary',
+      textClass: 'text-primary'
+    },
+    {
+      label: 'Cancelados',
+      value: 22,
+      progressClass: 'bg-primary bg-opacity-75',
+      textClass: 'text-primary text-opacity-75'
+    },
+    {
+      label: 'Devoluciones',
+      value: 3,
+      progressClass: 'bg-primary bg-opacity-50',
+      textClass: 'text-primary text-opacity-50'
+    }
+  ];
   reservations: ReservationItem[] = [
     {
       name: 'Emma Johnson',
@@ -257,8 +279,23 @@ conversionSegments = [
   leadsChartOptions: Partial<DonutChartOptions>;
   monthlyStatusChartOptions: Partial<SparklineChartOptions>;
   monthlyTargetChartOptions: Partial<RadialChartOptions>;
+  private pb = new PocketBase('https://db.buckapi.site:8030');
 
-  constructor() {
+  totalTeams = 0;
+  totalCategories = 0;
+  totalGroups = 0;
+  totalDivisions = 0;
+
+  loadingDashboard = false;
+  teams: Team[] = [];
+  searchTerm = '';
+  currentPage = 1;
+  pageSize = 50;
+  groupsMap = new Map<string, string>();
+  categoriesMap = new Map<string, string>();
+
+  constructor(private http: HttpClient, public cdr: ChangeDetectorRef) {
+    this.loadTeamsCount();
     this.summaryChartOptions = this.buildSummaryChart(this.selectedPeriod);
 
     this.leadsChartOptions = {
@@ -366,7 +403,47 @@ conversionSegments = [
       labels: ['Conversión'],
     };
   }
+  async loadTeams(): Promise<void> {
+    try {
+      const records = await this.pb.collection('teams').getFullList<Team>({
+        sort: '-created',
+        expand: 'group_id,category_id'
+      });
 
+      this.teams = records;
+
+    } catch (error) {
+      console.error('Error cargando teams:', error);
+      this.teams = [];
+    }
+  }
+  async loadRelations(): Promise<void> {
+    try {
+      const [groups, categories] = await Promise.all([
+        this.pb.collection('groups').getFullList<any>(),
+        this.pb.collection('categories').getFullList<any>()
+      ]);
+
+      this.groupsMap.clear();
+      this.categoriesMap.clear();
+
+      groups.forEach((g: any) => {
+        // OJO: el team.group_id coincide con groups.id_group
+        this.groupsMap.set(g.id_group, g.name);
+      });
+
+      categories.forEach((c: any) => {
+        // OJO: el team.category_id coincide con categories.category_id
+        this.categoriesMap.set(c.category_id, c.name);
+      });
+
+      console.log('groupsMap:', this.groupsMap);
+      console.log('categoriesMap:', this.categoriesMap);
+
+    } catch (error) {
+      console.error('Error cargando relaciones:', error);
+    }
+  }
   buildSummaryChart(period: 'thisYear' | 'lastYear'): Partial<SummaryChartOptions> {
     const quotesData =
       period === 'thisYear'
@@ -435,14 +512,127 @@ conversionSegments = [
     );
   }
 
-  get totalPages(): number {
-    return Math.max(1, Math.ceil(this.filteredReservations.length / this.pageSize));
-  }
 
   get paginatedReservations(): ReservationItem[] {
     const start = (this.currentPage - 1) * this.pageSize;
     const end = start + this.pageSize;
     return this.filteredReservations.slice(start, end);
+  }
+
+
+  loadTeamsCount(): void {
+    this.http.get<any>('assets/data/teams_nes.json').subscribe({
+      next: (data) => {
+        this.totalTeams = data.data ? data.data.length : 0;
+      },
+      error: (err) => {
+        console.error('Error loading teams count:', err);
+        this.totalTeams = 0;
+      },
+    });
+  }
+  async ngOnInit(): Promise<void> {
+    await this.loadDashboardCounters();
+
+    // 🔥 IMPORTANTE: esperar ambas
+    await Promise.all([
+      this.loadRelations(),
+      this.loadTeams()
+    ]);
+
+    this.cdr.detectChanges();
+  }
+  getGroupName(groupId: string | undefined): string {
+    if (!groupId || groupId === 'N/A') return 'Sin grupo';
+    return this.groupsMap.get(groupId) || 'Sin grupo';
+  }
+
+  getCategoryName(categoryId: string | undefined): string {
+    if (!categoryId || categoryId === 'N/A') return 'Sin categoría';
+    return this.categoriesMap.get(categoryId) || 'Sin categoría';
+  }
+  async loadDashboardCounters(): Promise<void> {
+    this.loadingDashboard = true;
+
+    try {
+      const [teams, groups, categories] = await Promise.all([
+        this.pb.collection('teams').getFullList({ sort: '-created' }),
+        this.pb.collection('groups').getFullList({ sort: '-created' }),
+
+        // Si tu colección se llama categories:
+        this.pb.collection('categories').getFullList({ sort: '-created' }),
+
+        // Si realmente se llama divisions, cambia la línea anterior por:
+        // this.pb.collection('divisions').getFullList({ sort: '-created' }),
+      ]);
+
+      this.totalTeams = teams.length;
+      this.totalGroups = groups.length;
+      this.totalCategories = categories.length;
+      this.totalDivisions = categories.length;
+
+    } catch (error) {
+      console.error('[Home] Error cargando contadores:', error);
+
+      this.totalTeams = 0;
+      this.totalGroups = 0;
+      this.totalCategories = 0;
+      this.totalDivisions = 0;
+    } finally {
+      this.loadingDashboard = false;
+    }
+  }
+
+
+  /* get paginatedTeams(): Team[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredTeams.slice(start, start + this.pageSize);
+  } */
+
+  getMainImageUrl(team: Team): string {
+    if (team.image_logo) {
+      return this.pb.files.getUrl(team as any, team.image_logo);
+    }
+
+    return 'assets/images/placeholder-team.jpg';
+  }
+
+  getStatusText(team: Team): string {
+    if (team.isFeatured) return 'Destacado';
+    if (team.isActive) return 'Activo';
+    return 'Inactivo';
+  }
+
+  getStatusClass(team: Team): string {
+    if (team.isFeatured) return 'bg-warning text-dark';
+    if (team.isActive) return 'bg-success-subtle text-success';
+    return 'bg-secondary-subtle text-secondary';
+  }
+
+  trackByTeamId(index: number, team: Team): string {
+    return team.id;
+  }
+
+  get filteredTeams(): Team[] {
+    const term = this.searchTerm.trim().toLowerCase();
+
+    if (!term) return this.teams;
+
+    return this.teams.filter(team =>
+      team.name?.toLowerCase().includes(term) ||
+      team.created?.toLowerCase().includes(term) ||
+      team.group_id?.toLowerCase().includes(term) ||
+      team.category_id?.toLowerCase().includes(term)
+    );
+  }
+
+  get paginatedTeams(): Team[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredTeams.slice(start, start + this.pageSize);
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.filteredTeams.length / this.pageSize));
   }
 
   get pages(): number[] {
@@ -454,15 +644,14 @@ conversionSegments = [
   }
 
   goToPage(page: number): void {
-    if (page < 1 || page > this.totalPages) {
-      return;
-    }
+    if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
   }
 
   getShowingTo(): number {
-    return Math.min(this.currentPage * this.pageSize, this.filteredReservations.length);
+    return Math.min(this.currentPage * this.pageSize, this.filteredTeams.length);
   }
 
   Math = Math;
+
 }
