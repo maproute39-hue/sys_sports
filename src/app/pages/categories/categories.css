@@ -208,3 +208,40 @@
   border: none;
   color: white;
 }
+/* Tabs base */
+.nav-tabs .nav-link {
+  border: none;
+  color: #6c757d;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+/* Hover sutil */
+.nav-tabs .nav-link:hover {
+  color: #0d6efd;
+  background-color: rgba(13, 110, 253, 0.05);
+}
+
+/* Activa */
+.nav-tabs .nav-link.active {
+  color: #0d6efd;
+  background-color: #fff;
+}
+
+/* 🔥 Borde inferior moderno */
+.nav-tabs .nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 10%;
+  width: 80%;
+  height: 3px;
+  background: #0d6efd;
+  border-radius: 2px;
+}
+
+/* Opcional: leve elevación */
+.nav-tabs .nav-link.active {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  border-radius: 6px 6px 0 0;
+}

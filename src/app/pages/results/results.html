@@ -107,6 +107,8 @@
               <th class="text-center">PP</th>
               <th class="text-center">SG</th>
               <th class="text-center">SP</th>
+              <th class="text-center">PF</th>
+<th class="text-center">PC</th>
               <th class="text-center">DIF</th>
               <th class="text-center">PTS</th>
               <th>Estado</th>
@@ -148,7 +150,8 @@
               <td class="text-center text-danger fw-bold">{{ team.lost }}</td>
               <td class="text-center">{{ team.setsFor }}</td>
               <td class="text-center">{{ team.setsAgainst }}</td>
-
+<td class="text-center">{{ team.pointsFor }}</td>
+<td class="text-center">{{ team.pointsAgainst }}</td>
               <td class="text-center">
                 <span
                   class="badge"
@@ -157,6 +160,7 @@
                     'bg-danger': (team.setsFor - team.setsAgainst) < 0,
                     'bg-secondary': (team.setsFor - team.setsAgainst) === 0
                   }">
+                  
                   {{ team.setsFor - team.setsAgainst }}
                 </span>
               </td>

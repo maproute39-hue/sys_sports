@@ -27,6 +27,19 @@ export interface GeneratedMatch {
   styleUrl: './categories.css',
 })
 export class Categories implements OnInit, OnDestroy {
+  courts: any[] = [];
+
+async loadCourts(): Promise<void> {
+  try {
+    this.courts = await this.matchesService.pb
+      .collection('courts')
+      .getFullList({
+        sort: 'name'
+      });
+  } catch (error) {
+    console.error('Error cargando canchas:', error);
+  }
+}
   pointsFor: number = 0;
 pointsAgainst: number = 0;
   showByStandings = false;
@@ -296,6 +309,25 @@ async deleteAllMatches(): Promise<void> {
     });
   }
 }
+getRoundDate(round: { round: number; matches: MatchRecord[] }): string {
+  const matchWithDate = round.matches.find(match => !!match.scheduled_at);
+
+  if (!matchWithDate?.scheduled_at) return '';
+
+  return new Date(matchWithDate.scheduled_at).toLocaleString('es-CO', {
+    dateStyle: 'medium',
+    timeStyle: 'short'
+  });
+}
+
+getRoundCourt(round: { round: number; matches: MatchRecord[] }): string {
+  const matchWithCourt = round.matches.find(match => !!match.court);
+  return matchWithCourt?.court || '';
+}
+
+hasRoundSchedule(round: { round: number; matches: MatchRecord[] }): boolean {
+  return !!this.getRoundDate(round) || !!this.getRoundCourt(round);
+}
 hasMatches(category: Category): boolean {
   return this.allMatches.some(match =>
     match.category_id === category.category_id
@@ -375,9 +407,149 @@ this.subscriptions.add(
     await this.realtimeTeamsService.loadTeams();
     await this.realtimeTeamsService.subscribeRealtime();
     this.groups = await this.groupsService.getGroups();
+    await this.loadCourts();
+
     await this.loadAllMatches();
   }
   generatedMatches: GeneratedMatch[] = [];
+  async openRoundScheduleModal(round: { round: number; matches: MatchRecord[] }): Promise<void> {
+  if (!round.matches.length) return;
+
+  const firstMatch = round.matches[0];
+
+  const formatDateForDatetimeLocal = (value: any | null | undefined): string => {
+    if (!value) return '';
+
+    const date = new Date(value);
+
+    if (isNaN(date.getTime())) return '';
+
+    const pad = (n: number) => String(n).padStart(2, '0');
+
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1);
+    const day = pad(date.getDate());
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
+  const currentDate = formatDateForDatetimeLocal(firstMatch.scheduled_at);
+
+  const currentCourt = firstMatch.court || '';
+
+  const courtsOptions = this.courts.map(court => `
+    <option value="${court.name}" ${court.name === currentCourt ? 'selected' : ''}>
+      ${court.name}
+    </option>
+  `).join('');
+
+  const result = await Swal.fire({
+    title: `Editar Jornada ${round.round}`,
+    width: 600,
+    showCancelButton: true,
+    confirmButtonText: 'Guardar cambios',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#198754',
+    cancelButtonColor: '#6c757d',
+    customClass: {
+      popup: 'swal-rounded'
+    },
+    html: `
+      <div style="text-align:left">
+
+        <label style="font-weight:600; margin-bottom:6px; display:block;">
+          Fecha y hora del encuentro
+        </label>
+
+        <input
+          id="round_date"
+          type="datetime-local"
+          class="swal2-input"
+          style="width:100%; margin:0 0 16px 0;"
+          value="${currentDate}"
+        />
+
+        <label style="font-weight:600; margin-bottom:6px; display:block;">
+          Cancha / Lugar
+        </label>
+
+        <select
+          id="round_court"
+          class="swal2-select"
+          style="width:100%; margin:0;"
+        >
+          <option value="">Seleccionar cancha</option>
+          ${courtsOptions}
+        </select>
+
+        <p style="font-size:13px; color:#6c757d; margin-top:16px;">
+          Este cambio se aplicará a los ${round.matches.length} partidos de la Jornada ${round.round}.
+        </p>
+
+      </div>
+    `,
+    preConfirm: () => {
+      const dateInput = document.getElementById('round_date') as HTMLInputElement | null;
+      const courtInput = document.getElementById('round_court') as HTMLSelectElement | null;
+
+      if (!dateInput?.value) {
+        Swal.showValidationMessage('Debes seleccionar una fecha y hora.');
+        return false;
+      }
+
+      if (!courtInput?.value) {
+        Swal.showValidationMessage('Debes seleccionar una cancha.');
+        return false;
+      }
+
+      return {
+        scheduled_at: dateInput.value,
+        court: courtInput.value
+      };
+    }
+  });
+
+  if (!result.isConfirmed || !result.value) return;
+
+  try {
+    Swal.fire({
+      title: 'Actualizando jornada...',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: () => Swal.showLoading()
+    });
+
+for (const match of round.matches) {
+  await this.matchesService.pb.collection('matches').update(match.id, {
+    scheduled_at: new Date(result.value.scheduled_at).toISOString(),
+    court: result.value.court
+  });
+}
+
+    if (this.selectedCategory) {
+      await this.matchesService.loadMatchesByCategory(this.selectedCategory.category_id);
+    }
+
+    await Swal.fire({
+      icon: 'success',
+      title: 'Jornada actualizada',
+      text: `La Jornada ${round.round} fue actualizada correctamente.`,
+      confirmButtonColor: '#198754'
+    });
+
+  } catch (error) {
+    console.error('Error actualizando jornada:', error);
+
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'No se pudo actualizar la jornada.'
+    });
+  }
+}
   getGeneratedRounds(): { round: number; matches: GeneratedMatch[] }[] {
     const roundsMap = new Map<number, GeneratedMatch[]>();
 

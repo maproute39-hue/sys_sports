@@ -391,10 +391,41 @@ style="cursor: pointer;"
 
         <ul class="nav nav-tabs mb-3">
           <li class="nav-item" *ngFor="let round of getSavedRounds()">
-            <button type="button" class="nav-link" [class.active]="activeRound === round.round"
-              (click)="setActiveRound(round.round)">
-              Jornada {{ round.round }}
-            </button>
+           <button
+  type="button"
+  class="nav-link d-flex align-items-center gap-2"
+  [class.active]="activeRound === round.round"
+  (click)="setActiveRound(round.round)">
+
+<div class="card-header">
+  <div class="fw-bold">
+    Jornada {{ round.round }}
+  </div>
+
+  <div
+    *ngIf="hasRoundSchedule(round)"
+    class="small text-muted mt-1 d-flex flex-column gap-2">
+
+    <span *ngIf="getRoundDate(round)">
+      <i class="fi fi-rr-calendar me-1"></i>
+      {{ getRoundDate(round) }}
+    </span>
+ 
+
+    <span *ngIf="getRoundCourt(round)">
+      <i class="fi fi-rr-marker me-1"></i>
+      {{ getRoundCourt(round) }}
+    </span>
+
+  </div>
+</div>
+  <i
+    class="fi fi-rr-edit"
+    title="Editar fecha y cancha"
+    style="cursor:pointer;"
+    (click)="openRoundScheduleModal(round); $event.stopPropagation()">
+  </i>
+</button>
           </li>
         </ul>
 

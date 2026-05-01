@@ -14,6 +14,8 @@ export interface TeamStats {
   setsFor: number;
   setsAgainst: number;
   points: number;
+    pointsFor: number;
+  pointsAgainst: number;
 }
 
 
@@ -124,7 +126,9 @@ const initTeam = (teamId: string, name: string, logo?: string) => {
       lost: 0,
       setsFor: 0,
       setsAgainst: 0,
-      points: 0
+      points: 0,
+        pointsFor: 0,
+  pointsAgainst: 0
     };
   }
 };
@@ -138,10 +142,18 @@ initTeam(match.away_team_id, match.away_team_name, match.away_image_logo);
         let homeSetsWon = 0;
         let awaySetsWon = 0;
 
-        match.sets.forEach((set: any) => {
-          if (set.home_points > set.away_points) homeSetsWon++;
-          if (set.away_points > set.home_points) awaySetsWon++;
-        });
+   match.sets.forEach((set: any) => {
+
+  // 🔥 ACUMULADO DE PUNTOS
+  table[match.home_team_id].pointsFor += set.home_points;
+  table[match.home_team_id].pointsAgainst += set.away_points;
+
+  table[match.away_team_id].pointsFor += set.away_points;
+  table[match.away_team_id].pointsAgainst += set.home_points;
+
+  if (set.home_points > set.away_points) homeSetsWon++;
+  if (set.away_points > set.home_points) awaySetsWon++;
+});
 
         table[match.home_team_id].played++;
         table[match.away_team_id].played++;
@@ -169,15 +181,31 @@ initTeam(match.away_team_id, match.away_team_name, match.away_image_logo);
         }
       });
 
+    // return Object.values(table).sort((a, b) => {
+    //   if (b.points !== a.points) return b.points - a.points;
+
+    //   const diffB = b.setsFor - b.setsAgainst;
+    //   const diffA = a.setsFor - a.setsAgainst;
+
+    //   if (diffB !== diffA) return diffB - diffA;
+
+    //   return b.setsFor - a.setsFor;
+    // });
     return Object.values(table).sort((a, b) => {
-      if (b.points !== a.points) return b.points - a.points;
+  if (b.points !== a.points) return b.points - a.points;
 
-      const diffB = b.setsFor - b.setsAgainst;
-      const diffA = a.setsFor - a.setsAgainst;
+  const diffB = b.setsFor - b.setsAgainst;
+  const diffA = a.setsFor - a.setsAgainst;
 
-      if (diffB !== diffA) return diffB - diffA;
+  if (diffB !== diffA) return diffB - diffA;
 
-      return b.setsFor - a.setsFor;
-    });
+  // 🔥 NUEVO desempate
+  const pfDiffB = b.pointsFor - b.pointsAgainst;
+  const pfDiffA = a.pointsFor - a.pointsAgainst;
+
+  if (pfDiffB !== pfDiffA) return pfDiffB - pfDiffA;
+
+  return b.pointsFor - a.pointsFor;
+});
   }
 }
