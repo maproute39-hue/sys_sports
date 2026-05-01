@@ -38,7 +38,7 @@ export const routes: Routes = [
     title: 'Inicio',
     data: {
       description: 'Panel principal',
-      canonical: '/'
+      canonical: 'Home'
     }
   },
 
@@ -63,7 +63,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/teams/teams').then(m => m.Teams),
     canActivate: [authGuard],
-    title: 'Equipos'
+    title: 'Equipos',
+    data: {
+      description: 'Panel Equipos',
+      canonical: '/'
+    }
   },
 
   {

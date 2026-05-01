@@ -27,6 +27,119 @@ export interface GeneratedMatch {
   styleUrl: './categories.css',
 })
 export class Categories implements OnInit, OnDestroy {
+  pointsFor: number = 0;
+pointsAgainst: number = 0;
+  showByStandings = false;
+buildStandingsTableHtml(standings: any[], groupName: string): string {
+  return `
+  <style>
+    .table-standings {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .table-standings th {
+      background: #f8f9fa;
+      padding: 8px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .table-standings td {
+      padding: 8px;
+      text-align: center;
+      border-bottom: 1px solid #eee;
+    }
+
+    .team-cell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-align: left;
+    }
+
+    .team-cell img {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .badge-pos {
+      background: #6c5ce7;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    .badge-points {
+      background: #6c5ce7;
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+  </style>
+
+  <table class="table-standings">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th style="text-align:left">Equipo</th>
+        <th>PJ</th>
+        <th>PG</th>
+        <th>PP</th>
+        <th>SG</th>
+        <th>SP</th>
+             <th>PF</th>
+<th>PC</th>
+        <th>DIF</th>
+   
+        <th>PTS</th>
+        
+      </tr>
+    </thead>
+
+    <tbody>
+      ${standings.map((team, i) => `
+        <tr>
+          <td>
+            <span class="badge-pos">${i + 1}</span>
+          </td>
+
+          <td>
+            <div class="team-cell">
+              <img src="${this.getDisplayTeamImageUrl(team)}" />
+              ${team.name}
+            </div>
+          </td>
+
+          <td>${team.played}</td>
+          <td style="color:green">${team.won}</td>
+          <td style="color:red">${team.lost}</td>
+          <td>${team.setsFor}</td>
+          <td>${team.setsAgainst}</td>
+          <td>${team.pointsFor}</td>
+          <td>${team.pointsAgainst}</td>
+          <td>
+            ${(team.setsFor - team.setsAgainst)}
+          </td>
+
+          <td>
+            <span class="badge-points">
+              ${team.points}
+            </span>
+          </td>
+        </tr>
+      `).join('')}
+    </tbody>
+  </table>
+  `;
+}
+toggleStandingsView(): void {
+  this.showByStandings = !this.showByStandings;
+}
   allMatches: MatchRecord[] = [];
   savedMatches: MatchRecord[] = []; 
   showCategories = true;
@@ -52,6 +165,34 @@ async loadAllMatches(): Promise<void> {
   } catch (error) {
     console.error('Error cargando todos los partidos:', error);
   }
+}
+getTeamsForDisplay(group: Group): any[] {
+  if (this.showByStandings) {
+    const standings = this.getStandingsByGroup(group);
+
+    if (standings.length > 0) {
+      return standings;
+    }
+  }
+
+  return this.getTeamsByGroup(group);
+}
+getDisplayTeamImageUrl(team: any): string {
+  if (!team) {
+    return 'assets/images/placeholder-team.jpg';
+  }
+
+  // Vista normal: Team original de PocketBase
+  if (team.collectionId && team.id && team.image_logo) {
+    return this.realtimeTeamsService.pb.files.getUrl(team as any, team.image_logo);
+  }
+
+  // Vista por tabla: objeto calculado TeamStats
+  if (team.teamId && team.image_logo) {
+    return `${this.realtimeTeamsService.pb.baseUrl}/api/files/teams/${team.teamId}/${team.image_logo}`;
+  }
+
+  return 'assets/images/placeholder-team.jpg';
 }
 getCategoriesWithoutMatches(): Category[] {
   return this.categories.filter(category => {
@@ -583,6 +724,129 @@ getSavedMatchImageUrl(match: MatchRecord, side: 'home' | 'away'): string {
   }
 
   return `${this.realtimeTeamsService.pb.baseUrl}/api/files/teams/${teamId}/${fileName}`;
+}
+async openGroupStandingsModal(group: Group): Promise<void> {
+  const standings = this.getStandingsByGroup(group);
+
+  if (!standings.length) {
+    Swal.fire({
+      icon: 'info',
+      title: 'Sin resultados',
+      text: 'Este grupo aún no tiene resultados registrados.'
+    });
+    return;
+  }
+
+  const html = this.buildStandingsTableHtml(standings, group.name);
+
+  await Swal.fire({
+    title: `Tabla - ${group.name}`,
+    width: 900,
+    html,
+    showCloseButton: true,
+    showConfirmButton: false,
+    customClass: {
+      popup: 'swal-rounded'
+    }
+  });
+}
+getStandingsByGroup(group: Group): any[] {
+  if (!this.selectedCategory) return [];
+
+  const matches = this.savedMatches.filter(match =>
+    match.group_id === group.id_group &&
+    match.status === 'finished' &&
+    match.sets?.length
+  );
+
+  const table: any = {};
+
+  const initTeam = (id: string, name: string, logo?: string) => {
+    if (!table[id]) {
+table[id] = {
+  teamId: id,
+  name,
+  image_logo: logo,
+  played: 0,
+  won: 0,
+  lost: 0,
+  setsFor: 0,
+  setsAgainst: 0,
+  points: 0,
+  pointsFor: 0,        // ✅ NUEVO
+  pointsAgainst: 0     // ✅ NUEVO
+};
+    }
+  };
+
+  matches.forEach(match => {
+    initTeam(match.home_team_id, match.home_team_name, match.home_image_logo);
+    initTeam(match.away_team_id, match.away_team_name, match.away_image_logo);
+
+    let homeSets = 0;
+    let awaySets = 0;
+
+    match.sets.forEach((set: any) => {
+      table[match.home_team_id].pointsFor += set.home_points;
+table[match.home_team_id].pointsAgainst += set.away_points;
+
+table[match.away_team_id].pointsFor += set.away_points;
+table[match.away_team_id].pointsAgainst += set.home_points;
+      if (set.home_points > set.away_points) homeSets++;
+      else awaySets++;
+    });
+
+    table[match.home_team_id].played++;
+    table[match.away_team_id].played++;
+
+    table[match.home_team_id].setsFor += homeSets;
+    table[match.home_team_id].setsAgainst += awaySets;
+
+    table[match.away_team_id].setsFor += awaySets;
+    table[match.away_team_id].setsAgainst += homeSets;
+
+    // ganador
+    if (homeSets > awaySets) {
+      table[match.home_team_id].won++;
+      table[match.away_team_id].lost++;
+
+      table[match.home_team_id].points += homeSets === 2 ? 3 : 2;
+      table[match.away_team_id].points += awaySets === 1 ? 1 : 0;
+    } else {
+      table[match.away_team_id].won++;
+      table[match.home_team_id].lost++;
+
+      table[match.away_team_id].points += awaySets === 2 ? 3 : 2;
+      table[match.home_team_id].points += homeSets === 1 ? 1 : 0;
+    }
+  });
+
+return Object.values(table).sort((a: any, b: any) => {
+  if (b.points !== a.points) return b.points - a.points;
+
+  const diffA = a.setsFor - a.setsAgainst;
+  const diffB = b.setsFor - b.setsAgainst;
+
+  if (diffB !== diffA) return diffB - diffA;
+
+  // 🔥 nuevo desempate
+  const pfDiffA = a.pointsFor - a.pointsAgainst;
+  const pfDiffB = b.pointsFor - b.pointsAgainst;
+
+  if (pfDiffB !== pfDiffA) return pfDiffB - pfDiffA;
+
+  return b.pointsFor - a.pointsFor;
+});
+  // return Object.values(table).sort((a: any, b: any) => {
+  //   if (b.points !== a.points) return b.points - a.points;
+
+  //   const diffA = a.setsFor - a.setsAgainst;
+  //   const diffB = b.setsFor - b.setsAgainst;
+
+  //   if (diffB !== diffA) return diffB - diffA;
+
+  //   return b.setsFor - a.setsFor;
+  // });
 }
   generateMatchesForSelectedCategory(): void {
     if (!this.selectedCategory) return;

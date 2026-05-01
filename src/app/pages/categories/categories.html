@@ -191,6 +191,7 @@ style="cursor: pointer;"
                 <small class="text-muted">
                   {{ getGroupsBySelectedCategory().length }} grupos encontrados
                 </small>
+       
               </div>
 
               <!-- <button
@@ -208,6 +209,15 @@ style="cursor: pointer;"
   </ng-container>
 
 </button> -->
+         <button
+  class="btn btn-sm"
+  [ngClass]="showByStandings ? 'btn-success' : 'btn-outline-primary'"
+  (click)="toggleStandingsView()">
+
+  <i class="fi" [ngClass]="showByStandings ? 'fi-rr-chart-line' : 'fi-rr-list'"></i>
+
+  {{ showByStandings ? 'Ver orden original' : 'Ordenar por tabla' }}
+</button>
               <button class="btn btn-sm btn-outline-secondary" (click)="clearSelectedCategory()">
                 Cerrar
               </button>
@@ -232,7 +242,13 @@ style="cursor: pointer;"
                       <i class="fi fi-rr-users-alt me-2"></i>
                       {{ group.name }}
                     </h6>
+<button
+  class="btn btn-sm btn-outline-dark mt-2"
+  (click)="openGroupStandingsModal(group)">
 
+  <i class="fi fi-rr-chart-line me-1"></i>
+  Ver tabla
+</button>
                     <small class="text-muted d-block mb-2">
                       {{ getTeamsByGroup(group).length }}
                       {{ getTeamsByGroup(group).length === 1 ? 'equipo' : 'equipos' }}
@@ -240,13 +256,20 @@ style="cursor: pointer;"
 
                     <ul class="list-group list-group-flush" *ngIf="getTeamsByGroup(group).length > 0">
                       <li class="list-group-item d-flex align-items-center gap-2 px-0 py-1"
-                        *ngFor="let team of getTeamsByGroup(group)">
-
+                      *ngFor="let team of getTeamsForDisplay(group); let i = index">
+<span
+  *ngIf="showByStandings"
+  class="badge bg-primary">
+  {{ i + 1 }}
+</span>
                         <!-- SI TIENE IMAGEN -->
-                        <ng-container *ngIf="getMainImageUrl(team); else noImage">
-                          <img [src]="getMainImageUrl(team)" alt="Icono de equipo"
-                            class="avatar avatar-xxs rounded-circle">
-                        </ng-container>
+                     <ng-container *ngIf="getDisplayTeamImageUrl(team); else noImage">
+  <img
+    [src]="getDisplayTeamImageUrl(team)"
+    alt="Icono de equipo"
+    class="avatar avatar-xxs rounded-circle">
+</ng-container>
+
 
                         <!-- SI NO TIENE IMAGEN -->
                         <ng-template #noImage>
@@ -257,7 +280,17 @@ style="cursor: pointer;"
                         </ng-template>
 
                         <span>{{ team.name }}</span>
+<span *ngIf="showByStandings" class="ms-auto text-end small">
 
+  <span class="badge bg-success me-1">
+    {{ team.points }} pts
+  </span>
+
+  <!-- <span class="badge bg-light text-dark">
+    {{ team.setsFor }}-{{ team.setsAgainst }}
+  </span> -->
+
+</span>
                       </li>
                     </ul>
 
@@ -354,7 +387,7 @@ style="cursor: pointer;"
       <div [ngClass]="showCategories ? 'col-lg-6' : 'col-lg-6 col-12'"
         *ngIf="savedMatches.length > 0 && generatedMatches.length === 0">
 
-        <h5 class="mb-3">Partidos guardados</h5>
+        <h5 class="mb-3">Partidos Programados</h5>
 
         <ul class="nav nav-tabs mb-3">
           <li class="nav-item" *ngFor="let round of getSavedRounds()">
